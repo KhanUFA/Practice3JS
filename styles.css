@@ -1,0 +1,18 @@
+#panelButtons{
+    display: flex;
+    background-color: bisque;
+    width: 50%;
+    flex-direction: column;
+}
+
+#panelListToDo{
+    background-color: rgba(255, 235, 205, 0.466);
+    width: 50%;
+}
+
+.Flex-box{
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    min-height: 120px;
+}
