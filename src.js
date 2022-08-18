@@ -7,17 +7,7 @@ function render(todo, elem){
     elem.innerText = "";
     
     todo.forEach(row => {
-        const rowToDo = document.createElement("li");
-        const checkBox = document.createElement("input")
-        checkBox.setAttribute("type", "checkbox");
-        rowToDo.innerText = row.text;
-
-        if(row.done){
-            checkBox.setAttribute("checked", "true");
-        }
-        
-        rowToDo.append(checkBox);
-        elem.append(rowToDo);
+        addElement(row, elem);
     });
 };
 
@@ -28,13 +18,20 @@ window.onload = () => {
 
 function addElement(row, element){
     const rowToDo = document.createElement("li");
-        const checkBox = document.createElement("input")
-        checkBox.setAttribute("type", "checkbox");
-        rowToDo.innerText = row.text;
+    const checkBox = document.createElement("input")
+    checkBox.setAttribute("type", "checkbox");
+    rowToDo.innerText = row.text;
 
-        if(row.done){
-            checkBox.setAttribute("checked", "true");
-        }
-        
-        rowToDo.append(checkBox);
+    if(row?.color){
+        rowToDo.setAttribute("data-special", "background-Color: " + row.color);
+    }
+ 
+    if(row.done){
+        checkBox.setAttribute("checked", "");
+    } else{
+        rowToDo.setAttribute("data-undone", "");
+    }
+    
+    rowToDo.append(checkBox);
+    element.append(rowToDo);
 }
