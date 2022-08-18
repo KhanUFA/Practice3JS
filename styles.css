@@ -1,3 +1,10 @@
+.Flex-box{
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    min-height: 220px;
+}
+
 #panelButtons{
     display: flex;
     background-color: bisque;
@@ -8,11 +15,23 @@
 #panelListToDo{
     background-color: rgba(255, 235, 205, 0.466);
     width: 50%;
+    text-align: center;
+    align-content: center;
+    display: inline-block;
 }
 
-.Flex-box{
+button{
+    width: 140px;
+    align-self: center;
+}
+
+ol{
     display: flex;
-    flex-direction: row;
+    width: fit-content;
+    flex-direction: column;
     align-content: center;
-    min-height: 120px;
+}
+
+li[data-undone]{
+    font-weight: 550;
 }
