@@ -7,7 +7,7 @@
 
 #panelButtons{
     display: flex;
-    background-color: bisque;
+    background-color: rgb(255, 228, 196);
     width: 50%;
     flex-direction: column;
 }
@@ -15,7 +15,6 @@
 #panelListToDo{
     background-color: rgba(255, 235, 205, 0.466);
     width: 50%;
-    text-align: center;
     align-content: center;
     display: inline-block;
 }
@@ -27,11 +26,18 @@ button{
 
 ol{
     display: flex;
-    width: fit-content;
     flex-direction: column;
-    align-content: center;
+    align-items: center;
+}
+
+li{
+    width: fit-content;
 }
 
 li[data-undone]{
     font-weight: 550;
+}
+
+.highlight{
+    background-color: rgba(255, 228, 210, 0.897);
 }
