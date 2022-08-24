@@ -16,8 +16,9 @@ function render() {
 	if (!(selectedPositionRow === undefined)) {
 		const rowsInHTML = targetElement.getElementsByTagName("li");
 		for (let row of rowsInHTML) {
-			if (row.dataset.id == tasksDB[selectedPositionRow].id) {
+			if (row.dataset.id === selectedRow.dataset.id) {
 				highlight(row);
+				break;
 			}
 		}
 	}
@@ -69,20 +70,40 @@ function highlight(target) {
 
 //* Handler for List ol
 document.getElementById("list-To-Do").onclick = function (event) {
-	selectedPositionRow = tasksDB.findIndex(
-		(value, index, array) => value.id === Number(selectedRow.dataset.id)
-	);
 	if (event.target.tagName == "LI") {
 		highlight(event.target);
 	}
+
+	selectedPositionRow = tasksDB.findIndex(
+		(value, index, array) => value.id === Number(selectedRow.dataset.id)
+	);
 };
+
+document.getElementById("list-To-Do").addEventListener("click", {
+	handleEvent(event) {
+		let checkBox = event.target;
+		debugger;
+		if (checkBox.tagName != "INPUT") {
+			return;
+		}
+
+		//? Bad practice?
+		tasksDB.find((task, index, array) => {
+			if (task.id === Number(checkBox.parentElement.dataset.id)) {
+				array[index].done = checkBox.checked;
+				return true;
+			}
+			return false;
+		});
+		localStorage.setItem("tasksDB", JSON.stringify(tasksDB));
+	},
+});
 
 //* Handler for Panel of Buttons
 document.getElementById("panelButtons").onclick = function (event) {
 	const target = event.target;
 
 	const [colorInput, textInput] = modifyPanel.getElementsByTagName("input");
-
 	switch (target.value) {
 		case "add": //* Button add element on list and taskDB
 			let result = prompt("Добавить задачу:");
@@ -125,9 +146,9 @@ document.getElementById("panelButtons").onclick = function (event) {
 			break;
 
 		case "up": //* Button up element on taskDB
-			idPreviousRow = selectedRow.previousElementSibling?.dataset.id;
+			idPreviousRow = selectedRow.previousElementSibling;
 
-			if (idPreviousRow == null) {
+			if (idPreviousRow === null) {
 				alert("Задача уже первая!");
 				return;
 			}
@@ -142,9 +163,9 @@ document.getElementById("panelButtons").onclick = function (event) {
 			break;
 
 		case "down": //* Button down element on taskDB
-			let idNextRow = selectedRow.nextElementSibling?.dataset.id;
+			let idNextRow = selectedRow.nextElementSibling;
 
-			if (idNextRow == null) {
+			if (idNextRow === null) {
 				alert("Задача уже последняя!");
 				return;
 			}
@@ -158,15 +179,23 @@ document.getElementById("panelButtons").onclick = function (event) {
 			render();
 			break;
 	}
+	localStorage.setItem("tasksDB", JSON.stringify(tasksDB));
 };
 
 window.onload = () => {
-	tasksDB.push({
-		text: "Проснуться",
-		done: true,
-		color: "yellow",
-		id: setId(),
-	});
-	tasksDB.push({ text: "Улыбнуться", done: false, id: setId() });
+	var tasksFromStorage = localStorage.getItem("tasksDB");
+
+	if (tasksFromStorage) {
+		tasksDB = JSON.parse(tasksFromStorage);
+	} else {
+		tasksDB.push({
+			text: "Проснуться",
+			done: true,
+			color: "yellow",
+			id: setId(),
+		});
+		tasksDB.push({ text: "Улыбнуться", done: false, id: setId() });
+	}
+
 	render();
 };
