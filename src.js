@@ -1,152 +1,172 @@
 let tasksDB = [];
 let selectedRow = document.getElementById("list-To-Do");
+let selectedPositionRow;
+const modifyPanel = document.getElementById("panelModify");
 const setId = createId();
 
 ("use strict");
 function render() {
-  let targetElement = document.getElementById("list-To-Do");
-  targetElement.innerText = "";
+	let targetElement = document.getElementById("list-To-Do");
+	targetElement.innerText = "";
 
-  tasksDB.forEach((row) => {
-    addElement(row, targetElement);
-  });
+	tasksDB.forEach((row) => {
+		addElementInHTML(row, targetElement);
+	});
+
+	if (!(selectedPositionRow === undefined)) {
+		const rowsInHTML = targetElement.getElementsByTagName("li");
+		for (let row of rowsInHTML) {
+			if (row.dataset.id == tasksDB[selectedPositionRow].id) {
+				highlight(row);
+			}
+		}
+	}
 }
 
 function createId() {
-  let counter = 0;
+	let counter = 0;
 
-  return function () {
-    return counter++;
-  };
+	return function () {
+		return counter++;
+	};
 }
 
-function addElement(newRow, elementToAdd) {
-  const rowToDo = document.createElement("li");
-  const checkBox = document.createElement("input");
-  checkBox.setAttribute("type", "checkbox");
-  rowToDo.innerText = newRow.text;
-  if (newRow?.color) {
-    rowToDo.setAttribute("style", "background-color: " + newRow.color);
-  }
+function addElementInHTML(newRow, elementToAdd) {
+	const rowToDo = document.createElement("li");
+	const checkBox = document.createElement("input");
+	checkBox.setAttribute("type", "checkbox");
+	rowToDo.innerText = newRow.text;
 
-  if (newRow.done) {
-    checkBox.setAttribute("checked", "");
-  } else {
-    rowToDo.setAttribute("data-undone", "");
-  }
+	if (newRow?.color) {
+		rowToDo.setAttribute("style", "background-color: " + newRow.color);
+	}
 
-  rowToDo.setAttribute("data-id", newRow.id);
+	if (newRow.done) {
+		checkBox.setAttribute("checked", "");
+	} else {
+		rowToDo.setAttribute("data-undone", "");
+	}
 
-  rowToDo.append(checkBox);
+	rowToDo.setAttribute("data-id", newRow.id);
 
-  if (elementToAdd.tagName == "LI") {
-    elementToAdd.after(rowToDo);
-  } else {
-    elementToAdd.append(rowToDo);
-  }
+	rowToDo.append(checkBox);
+
+	if (elementToAdd.tagName == "LI") {
+		elementToAdd.after(rowToDo);
+	} else {
+		elementToAdd.append(rowToDo);
+	}
 }
 
 function highlight(target) {
-  if (selectedRow) {
-    selectedRow.classList.remove("highlight");
-  }
+	if (selectedRow) {
+		selectedRow.classList.remove("highlight");
+	}
 
-  selectedRow = target;
-  selectedRow.classList.add("highlight");
+	selectedRow = target;
+	selectedRow.classList.add("highlight");
 }
 
 //* Handler for List ol
 document.getElementById("list-To-Do").onclick = function (event) {
-  if (event.target.tagName == "LI") {
-    highlight(event.target);
-  }
+	selectedPositionRow = tasksDB.findIndex(
+		(value, index, array) => value.id === Number(selectedRow.dataset.id)
+	);
+	if (event.target.tagName == "LI") {
+		highlight(event.target);
+	}
 };
 
 //* Handler for Panel of Buttons
 document.getElementById("panelButtons").onclick = function (event) {
-  const target = event.target;
-  let tempRow, selectedPositionRow;
+	const target = event.target;
 
-  for (
-    selectedPositionRow = 0;
-    selectedPositionRow < tasksDB.length;
-    selectedPositionRow++
-  ) {
-    if (tasksDB[selectedPositionRow].id == selectedRow.id) {
-      break;
-    }
-  }
+	const [colorInput, textInput] = modifyPanel.getElementsByTagName("input");
 
-  switch (target.value) {
-    case "add":
-      let result = prompt("Добавить задачу:");
-      let row = { text: result, done: false, color: "white", id: setId() };
+	switch (target.value) {
+		case "add": //* Button add element on list and taskDB
+			let result = prompt("Добавить задачу:");
+			let row = { text: result, done: false, id: setId() };
 
-      if (selectedRow.tagName == "OL") {
-        tasksDB.push(row);
-      } else {
-        tasksDB.splice(selectedPositionRow, 0, row);
-      }
-      addElement(row, selectedRow);
-      break;
+			if (
+				selectedRow.tagName == "OL" ||
+				selectedPositionRow === tasksDB.length - 1
+			) {
+				tasksDB.push(row);
+			} else {
+				tasksDB.splice(selectedPositionRow + 1, 0, row);
+			}
+			addElementInHTML(row, selectedRow);
+			break;
 
-    case "delete":
-      tasksDB.splice(selectedPositionRow, 1);
-      selectedRow.remove();
-      console.log("Element on pos " + selectedPositionRow + " delete");
+		case "modify": //* Button show modify panel
+			modifyPanel.value = tasksDB[selectedPositionRow].text;
+			modifyPanel.classList.toggle("hidden");
+			textInput.value = tasksDB[selectedPositionRow].text;
+			break;
 
-      if (tasksDB.length === 0) {
-        selectedRow = document.getElementById("list-To-Do");
-      }
-      break;
+		case "applyModify": //* Button apply modify for DB
+			const [modifedElement] = tasksDB.splice(selectedPositionRow, 1);
+			modifedElement.text = textInput.value;
+			modifedElement.color = colorInput.value;
 
-    case "up":
-      idPreviousRow =
-        selectedRow.previousElementSibling?.getAttribute("data-id");
+			tasksDB.splice(selectedPositionRow, 0, modifedElement);
+			render();
+			break;
 
-      if (idPreviousRow == null) {
-        alert("Задача уже первая!");
-        return;
-      }
+		case "delete": //* Button Delete element
+			tasksDB.splice(selectedPositionRow, 1);
+			selectedRow.remove();
+			console.log("Element on pos " + selectedPositionRow + " delete");
 
-      tempRow = tasksDB.splice(selectedPositionRow, 1)[0];
-      debugger;
-      tasksDB.splice(selectedPositionRow, 0, tempRow);
-      render();
-      break;
+			if (tasksDB.length === 0) {
+				selectedRow = document.getElementById("list-To-Do");
+			}
+			break;
 
-    case "down":
-      let idNextRow = selectedRow.nextElementSibling?.getAttribute("data-id");
+		case "up": //* Button up element on taskDB
+			idPreviousRow = selectedRow.previousElementSibling?.dataset.id;
 
-      if (idNextRow == null) {
-        alert("Задача уже последняя!");
-        return;
-      }
+			if (idPreviousRow == null) {
+				alert("Задача уже первая!");
+				return;
+			}
 
-      for (
-        selectedPositionRow = 0;
-        selectedPositionRow < tasksDB.length;
-        selectedPositionRow++
-      ) {
-        if (tasksDB[selectedPositionRow].id == idNextRow) {
-          break;
-        }
-      }
+			tasksDB.splice(
+				selectedPositionRow - 1,
+				2,
+				tasksDB[selectedPositionRow],
+				tasksDB[selectedPositionRow - 1]
+			);
+			render();
+			break;
 
-      tempRow = tasksDB.splice(selectedPositionRow, 1)[0];
-      tasksDB.splice(selectedPositionRow + 1, 0, tempRow);
-      render();
-      break;
-  }
+		case "down": //* Button down element on taskDB
+			let idNextRow = selectedRow.nextElementSibling?.dataset.id;
+
+			if (idNextRow == null) {
+				alert("Задача уже последняя!");
+				return;
+			}
+
+			tasksDB.splice(
+				selectedPositionRow,
+				2,
+				tasksDB[selectedPositionRow + 1],
+				tasksDB[selectedPositionRow]
+			);
+			render();
+			break;
+	}
 };
 
 window.onload = () => {
-  tasksDB.push({
-    text: "Проснуться",
-    done: true,
-    color: "yellow",
-    id: setId(),
-  });
-  tasksDB.push({ text: "Улыбнуться", done: false, id: setId() });
-  render();
+	tasksDB.push({
+		text: "Проснуться",
+		done: true,
+		color: "yellow",
+		id: setId(),
+	});
+	tasksDB.push({ text: "Улыбнуться", done: false, id: setId() });
+	render();
 };
