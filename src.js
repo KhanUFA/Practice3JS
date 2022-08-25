@@ -70,19 +70,21 @@ function highlight(target) {
 
 //* Handler for List ol
 document.getElementById("list-To-Do").onclick = function (event) {
-	if (event.target.tagName == "LI") {
+	if (event.target.tagName === "LI") {
 		highlight(event.target);
 	}
 
 	selectedPositionRow = tasksDB.findIndex(
-		(value, index, array) => value.id === Number(selectedRow.dataset.id)
+		(value) => value.id === Number(selectedRow.dataset.id)
 	);
+
+	const textBox = document.getElementById("textBoxModify");
+	textBox.value = tasksDB[selectedPositionRow].text;
 };
 
 document.getElementById("list-To-Do").addEventListener("click", {
 	handleEvent(event) {
 		let checkBox = event.target;
-		debugger;
 		if (checkBox.tagName != "INPUT") {
 			return;
 		}
@@ -133,6 +135,7 @@ document.getElementById("panelButtons").onclick = function (event) {
 
 			tasksDB.splice(selectedPositionRow, 0, modifedElement);
 			render();
+			modifyPanel.classList.remove("hidden");
 			break;
 
 		case "delete": //* Button Delete element
@@ -159,6 +162,7 @@ document.getElementById("panelButtons").onclick = function (event) {
 				tasksDB[selectedPositionRow],
 				tasksDB[selectedPositionRow - 1]
 			);
+			selectedPositionRow--;
 			render();
 			break;
 
@@ -176,6 +180,7 @@ document.getElementById("panelButtons").onclick = function (event) {
 				tasksDB[selectedPositionRow + 1],
 				tasksDB[selectedPositionRow]
 			);
+			selectedPositionRow++;
 			render();
 			break;
 	}
